@@ -1,45 +1,27 @@
+#перед началом в терминале пишем pip install telebot
 import telebot
-import buttons as bt
-from geopy import Photon
+from telebot.util import user_link
 
-
-geolocator = Photon(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
-
-bot = telebot.TeleBot(token="7639143796:AAE1LPtVUdc4H0VkUhjOoktm4_p9RW3wJKI")
-
-@bot.message_handler(commands=["start"])
+token = "7639143796:AAE1LPtVUdc4H0VkUhjOoktm4_p9RW3wJKI"
+#создаем обьект бота
+bot = telebot.TeleBot(token=token)
+@bot.message_handler(commands=["start","help"])
 def start(message):
+    #кому бот обращается
     user_id = message.from_user.id
-    bot.send_message(user_id, "Добро пожаловать в бот доставки!")
-    bot.send_message(user_id, "Введите своё имя для регистрации")
-    print(message.text)
-    bot.register_next_step_handler(message, get_name)
-def get_name(message):
+    #тут бот обращается по username
+    name = message.from_user.username
+    bot.send_message(user_id, f"HI {name}")
+@bot.message_handler(content_types=["text"])
+def text (message):
     user_id = message.from_user.id
-    name = message.text
-    print(message.text)
-    bot.send_message(user_id, "Теперь поделитесь своим номером", reply_markup=bt.phone_button())
-    bot.register_next_step_handler(message, get_phone_number, name)
-def get_phone_number(message, name):
-    user_id = message.from_user.id
-    if message.contact:
-        phone_number = message.text
-        print(phone_number)
-        bot.send_message(user_id, "Отправьте свою локацию", reply_markup=bt.location_button())
-        bot.register_next_step_handler(message, get_location, name, phone_number)
-    else:
-        bot.send_message(user_id, "Отправьте свой номер через кнопку")
-        bot.register_next_step_handler(message, get_location, name, )
-def get_location(message, name, phone_number):
-    user_id = message.from_user.id
-    if message.location:
-        latitude = message.location.latitude
+    user_text = message.text
+    bot.send_message(user_id, user_text)
 
-        longitude = message.location.longitude
-        address = geolocator.reverse((latitude, longitude)).address
 
-    print(name, phone_number, address)
-    bot.send_message(user_id, "Вы успешно зарегистрировались!")
-    bot.send_message(user_id, "Главное меню: ")
 
+
+#Создаем команду для бесконечной работы бота
 bot.infinity_polling()
+#второй вариант
+#bot.polling(non_stop=True)
